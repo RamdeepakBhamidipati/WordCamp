@@ -51,7 +51,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // Disable CSRF protection
                 .authorizeHttpRequests(auth ->
                         auth
-                                .requestMatchers("/user/*", "/Task/*", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll() // Permit registration and login
+                                .requestMatchers( "/wordCamp/*", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll() // Permit registration and login
                                 .anyRequest().authenticated() // Secure other endpoints
                 );
 

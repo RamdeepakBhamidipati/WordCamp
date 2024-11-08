@@ -5,7 +5,7 @@ import com.example.todoapp.Models.UserInput;
 
 public interface UserService {
 
-    public User registerUser(UserInput userInput);
+    public Boolean getUserStatus(String email);
 
-    public String loginUser(String username, String password);
+    public Boolean updateCoupon(String email,String coupon);
 }

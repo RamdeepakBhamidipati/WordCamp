@@ -15,6 +15,7 @@ import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -22,45 +23,29 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
 
-    private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
-
-    public User registerUser(UserInput userInput) {
-        User user = new User();
-        user.setUserName(userInput.getUserName());
-        user.setPassword(passwordEncoder.encode(userInput.getPassword()));
-        user.setEmailId(userInput.getEmail());
-        user.setPhoneNum(userInput.getPhoneNum());
-        return userRepository.save(user);
-    }
-
-    // Authenticate user and generate JWT
-    public String loginUser(String username, String password) {
-        User user = userRepository.findByUserName(username);
-        if (user != null && passwordEncoder.matches(password, user.getPassword())) {
-            return generateToken(user);
+    public Boolean getUserStatus(String email){
+        Optional<User> user=userRepository.findByUserEmail(email);
+        if(user.isPresent())
+        {
+            if(user.get().getCoupon()!=null)
+            {
+                return false;
+            }
+            else{
+                return true;
+            }
         }
-        throw new RuntimeException("Invalid username or password");
-    }
-
-    // Generate JWT token
-    private String generateToken(User user) {
-        return Jwts.builder()
-                .setSubject(user.getUserName())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 day expiration
-                .signWith(SignatureAlgorithm.HS512, getKey()) // Use a strong secret key
-                .compact();
-    }
-
-    private String getKey(){
-        try{
-            KeyGenerator key=KeyGenerator.getInstance("HmacSHA256");
-            SecretKey sk=key.generateKey();
-            return Base64.getEncoder().encodeToString(sk.getEncoded());
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+        else{
+            User newUser=new User();
+            newUser.setUserEmail(email);
+            userRepository.save(newUser);
+            return true;
         }
+    }
+
+    public Boolean updateCoupon(String email,String coupon){
+        int rowStatus=userRepository.updateCouponByUserEmail(email,coupon);
+        return rowStatus>0;
     }
 
 }
